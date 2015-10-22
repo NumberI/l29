@@ -7,7 +7,7 @@ require 'sinatra/activerecord'
 set :database, "sqlite3:barbershop.db"
 
 class Client < ActiveRecord::Base
-	validates :name, presence: true
+	validates :name, presence: true, length: {minimum: 3}
 	validates :phone, presence: true
 	validates :datestamp, presence: true
 	validates :barber, presence: true
@@ -47,15 +47,22 @@ post "/visit" do
 	if @booking.save
 		erb "#{@booking.name}"
 	else
-		erb "<h1>error</h1>"
+		@error = @booking.errors.full_messages.first
+		erb :visit
 	end
-	
-	#hh = { :user => "Enter name", :phone => "Enter phone", :time => "Enter date"}
+end
 
-	#@error = hh.select {|key,_| params[key] == ""}.values.join(", ")
-	#if @error != ""
-	#	return erb :visit
-	#end
+get "/barber/:id" do
+	@barber = Barber.find(params[:id])
+	erb :barber
+end
 
+get "/bookings" do
+	@clients= Client.order("created_at DESC")
+	erb :bookings
+end
 
+get "/client/:id" do
+	@client = Client.find(params[:id])
+	erb :client
 end
